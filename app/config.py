@@ -31,6 +31,13 @@ class Settings(BaseSettings):
     # github_client_id: str = "Get from https://github.com/settings/applications/new"
     # github_client_secret: str = "Get from https://github.com/settings/applications/new"
 
+    # OAuth2 Generic (Authelia or Authentik)
+    oauth_client_id: str = "TODO: Get client id"
+    oauth_client_secret: str = "TODO: Get client secret"
+    oauth_api_url: str = "TODO: Get api url"
+    oauth_auth_url: str = "TODO: Get auth url"
+    oauth_access_token_url: str = "TODO: Get token url"
+
     # Database
     database_url: str | None = None
     mongodb_root_username: str | None = None
@@ -42,9 +49,10 @@ class Settings(BaseSettings):
     redis_password: SecretStr = "TODO generate with `openssl rand -hex 32`"  # type: ignore
 
     # Models settings
-    chat_models: set[str] = {"meta/llama-2-70b-chat", "openai/gpt_4"}
+    chat_models: set[str] = {"ollama/llama3", "meta/llama-2-70b-chat", "openai/gpt_4"}
     openai_api_key: SecretStr = "TODO"  # type: ignore
     together_api_key: SecretStr = "TODO"  # type: ignore
+    ollama_api_base: str = "TODO"  # type: ignore
     secret_prompt: str = "The secret is '{secret}'."
     max_len_defense_prompt: int = 512
     max_len_python_filter: int = 512

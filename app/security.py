@@ -1,6 +1,7 @@
 import secrets
 import string
 
+import fastapi_oauth2.client
 from fastapi import HTTPException
 from fastapi_oauth2.claims import Claims
 from fastapi_oauth2.client import OAuth2Client
@@ -32,8 +33,8 @@ def verify_api_key(plain_api_key, hashed_api_key):
     return pwd_context.verify(plain_api_key, hashed_api_key)
 
 
-class CustomGoogleOAuth2(GoogleOAuth2):
-    name = "google"
+# class CustomGoogleOAuth2(GoogleOAuth2):
+#     name = "google"
 
 
 # oauth2_clients = [
@@ -58,15 +59,33 @@ class CustomGoogleOAuth2(GoogleOAuth2):
 # ]
 
 
+class Authentik(BaseOAuth2):
+    """Authentik OAuth authentication backend"""
+    # https://github.com/python-social-auth/social-core/blob/master/social_core/backends/oauth.py
+    # https://github.com/python-social-auth/social-core/blob/master/social_core/backends/github.py
+
+    name = "authentik"
+    API_URL = settings.oauth_api_url
+    AUTHORIZATION_URL = settings.oauth_auth_url
+    ACCESS_TOKEN_URL = settings.oauth_access_token_url
+    ACCESS_TOKEN_METHOD = "POST"
+    SCOPE_SEPARATOR = ","
+    REDIRECT_STATE = False
+    STATE_PARAMETER = True
+    SEND_USER_AGENT = True
+    EXTRA_DATA = [("id", "id"), ("expires", "expires"), ("login", "login")]
+
+    def api_url(self):
+        return self.API_URL
+
+
 oauth2_clients = [
     OAuth2Client(
-        backend=BaseOAuth2,
-        client_id=settings.google_client_id,
-        client_secret=settings.google_client_secret,
+        backend=Authentik,
+        client_id=settings.oauth_client_id,
+        client_secret=settings.oauth_client_secret,
         scope=["openid", "email"],
-        claims=Claims(
-            identity=lambda user: f"{user.provider}:{user.sub}",
-        ),
+        claims=Claims(identity=lambda user: f"{user.provider}:{user.sub}",),
     ),
 ]
 

@@ -4,6 +4,7 @@ import enum
 class OAuth2SSOProvider(str, enum.Enum):
     google = "google"
     github = "github"
+    authentik = "authentik"
 
 
 class ChatRole(str, enum.Enum):

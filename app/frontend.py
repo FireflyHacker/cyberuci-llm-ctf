@@ -22,6 +22,7 @@ frontend_router = APIRouter()
 NICE_PROVIDER_NAMES = {
     OAuth2SSOProvider.google: "Google",
     OAuth2SSOProvider.github: "GitHub",
+    OAuth2SSOProvider.authentik: "Authentik",
 }
 
 HEADER = """
