@@ -14,31 +14,39 @@ ROLE_MAPPING = {
 }
 
 
-def is_openai(model: str) -> bool:
-    return model.startswith("openai/")
+# def is_openai(model: str) -> bool:
+#     return model.startswith("openai/")
+#
+#
+# def is_together(model: str) -> bool:
+#     return model.startswith("meta/")
 
 
-def is_together(model: str) -> bool:
-    return model.startswith("meta/")
+def is_llama3(model: str) -> bool:
+    return model.startswith("llama3/")
 
 
 def get_model_provider(model: str) -> enums.APIProvider:
-    if is_openai(model):
-        return enums.APIProvider.openai
-    elif is_together(model):
-        return enums.APIProvider.together
+    if is_llama3(model):
+        return enums.APIProvider.llama3
+
     raise ValueError(f"Invalid model: {model}")
 
 
-def parse_openai_model(model: str) -> str:
+# def parse_openai_model(model: str) -> str:
+#     return model.split("/")[1]
+#
+#
+# def parse_together_model(model: str) -> str:
+#     return f"{TOGETHER_PREFIX}/{model.split('/')[1]}"
+
+
+def parse_llama3_model(model: str) -> str:
     return model.split("/")[1]
 
 
-def parse_together_model(model: str) -> str:
-    return f"{TOGETHER_PREFIX}/{model.split('/')[1]}"
-
-
-MODEL_PARSERS = {enums.APIProvider.openai: parse_openai_model, enums.APIProvider.together: parse_together_model}
+#MODEL_PARSERS = {enums.APIProvider.openai: parse_openai_model, enums.APIProvider.together: parse_together_model, enums.APIProvider.llama3: parse_llama3_model}
+MODEL_PARSERS = {enums.APIProvider.llama3: parse_llama3_model}
 
 
 def parse_model_to_litellm(model: str) -> str:
@@ -75,24 +83,48 @@ async def generate(llm_provider_api_key, messages, model):
     return output, cost
 
 
+async def ollama_generate(api_base, messages, model):
+    completion = await litellm.acompletion(
+        model=parse_model_to_litellm(model),
+        messages=messages,
+        max_tokens=settings.max_tokens,
+        api_base=api_base,
+        request_timeout=settings.llm_request_timeout,
+    )
+    output = completion.choices[0].message.content  # type: ignore
+    cost = litellm.completion_cost(completion_response=completion)
+    return output, cost
+
+
 async def generate_chat(
-    system_prompt: str,
-    secret_prompt: str,
-    chat: schemas.Chat,
-    llm_provider_api_key: str,
+        system_prompt: str,
+        secret_prompt: str,
+        chat: schemas.Chat,
+        llm_provider_api_key: str,
 ) -> tuple[str, float]:
     system_prompt = build_system_prompt(system_prompt, secret_prompt, chat.secret.value, chat.defense.defense_prompt)
     messages = build_openai_conversation(system_prompt, chat.history)
     return await generate(llm_provider_api_key, messages, chat.model.value)
 
 
+async def ollama_generate_chat(
+        system_prompt: str,
+        secret_prompt: str,
+        chat: schemas.Chat,
+        api_base: str,
+) -> tuple[str, float]:
+    system_prompt = build_system_prompt(system_prompt, secret_prompt, chat.secret.value, chat.defense.defense_prompt)
+    messages = build_openai_conversation(system_prompt, chat.history)
+    return await generate(api_base, messages, chat.model.value)
+
+
 async def filter_with_llm(
-    prompt: str,
-    chat_history: list[str],
-    model_output: str,
-    secret: str,
-    model: str,
-    llm_provider_api_key: str,
+        prompt: str,
+        chat_history: list[str],
+        model_output: str,
+        secret: str,
+        model: str,
+        llm_provider_api_key: str,
 ) -> tuple[str, float]:
     prompt = prompt.format(last_user_prompt=chat_history[-1], secret=secret, model_output=model_output)
     history = [schemas.Message(role=enums.ChatRole.user, content=prompt)]
@@ -100,4 +132,21 @@ async def filter_with_llm(
         "", history
     )  # JAVI:  This removes system prompt. Recommended by LLaMA and works on OAI.
     filtered_output, cost = await generate(llm_provider_api_key, messages, model)
+    return filtered_output, cost
+
+
+async def ollama_filter_with_llm(
+        prompt: str,
+        chat_history: list[str],
+        model_output: str,
+        secret: str,
+        model: str,
+        api_base: str,
+) -> tuple[str, float]:
+    prompt = prompt.format(last_user_prompt=chat_history[-1], secret=secret, model_output=model_output)
+    history = [schemas.Message(role=enums.ChatRole.user, content=prompt)]
+    messages = build_openai_conversation(
+        "", history
+    )  # JAVI:  This removes system prompt. Recommended by LLaMA and works on OAI.
+    filtered_output, cost = await generate(api_base, messages, model)
     return filtered_output, cost

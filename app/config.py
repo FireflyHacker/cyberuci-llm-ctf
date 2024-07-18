@@ -25,11 +25,11 @@ class Settings(BaseSettings):
 
     # OAuth2
     allow_insecure_http: bool = False
-    # Google
-    google_client_id: str = "TODO: get from https://console.cloud.google.com/apis/credentials"
-    google_client_secret: str = "TODO: get from https://console.cloud.google.com/apis/credentials"
-    github_client_id: str = "Get from https://github.com/settings/applications/new"
-    github_client_secret: str = "Get from https://github.com/settings/applications/new"
+    # # Google
+    # google_client_id: str = "TODO: get from https://console.cloud.google.com/apis/credentials"
+    # google_client_secret: str = "TODO: get from https://console.cloud.google.com/apis/credentials"
+    # github_client_id: str = "Get from https://github.com/settings/applications/new"
+    # github_client_secret: str = "Get from https://github.com/settings/applications/new"
 
     # Database
     database_url: str | None = None

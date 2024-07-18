@@ -7,8 +7,9 @@ from fastapi_oauth2.client import OAuth2Client
 from fastapi_oauth2.middleware import Auth
 from fastapi_oauth2.middleware import User as OAuth2User
 from passlib.context import CryptContext
-from social_core.backends.github import GithubOAuth2
-from social_core.backends.google import GoogleOAuth2
+# from social_core.backends.github import GithubOAuth2
+# from social_core.backends.google import GoogleOAuth2
+from social_core.backends.oauth import BaseOAuth2
 from starlette import status
 from starlette.authentication import AuthenticationError
 
@@ -35,23 +36,36 @@ class CustomGoogleOAuth2(GoogleOAuth2):
     name = "google"
 
 
+# oauth2_clients = [
+#     OAuth2Client(
+#         backend=CustomGoogleOAuth2,
+#         client_id=settings.google_client_id,
+#         client_secret=settings.google_client_secret,
+#         scope=["openid", "email"],
+#         claims=Claims(
+#             identity=lambda user: f"{user.provider}:{user.sub}",
+#         ),
+#     ),
+#     OAuth2Client(
+#         backend=GithubOAuth2,
+#         client_id=settings.github_client_id,
+#         client_secret=settings.github_client_secret,
+#         scope=["user:email"],
+#         claims=Claims(
+#             identity=lambda user: f"{user.provider}:{user.id}",
+#         ),
+#     ),
+# ]
+
+
 oauth2_clients = [
     OAuth2Client(
-        backend=CustomGoogleOAuth2,
+        backend=BaseOAuth2,
         client_id=settings.google_client_id,
         client_secret=settings.google_client_secret,
         scope=["openid", "email"],
         claims=Claims(
             identity=lambda user: f"{user.provider}:{user.sub}",
-        ),
-    ),
-    OAuth2Client(
-        backend=GithubOAuth2,
-        client_id=settings.github_client_id,
-        client_secret=settings.github_client_secret,
-        scope=["user:email"],
-        claims=Claims(
-            identity=lambda user: f"{user.provider}:{user.id}",
         ),
     ),
 ]
