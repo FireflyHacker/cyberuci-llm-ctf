@@ -181,8 +181,7 @@ def login(
         return make_page(title="Login", body=body, logged_in=request.user.is_authenticated)
 
     body = (
-        f'<p>Log In with <a href="/oauth2/{OAuth2SSOProvider.google.value}/authorize">Google</a> or <a'
-        f' href="/oauth2/{OAuth2SSOProvider.github.value}/authorize">GitHub</a>.</p>'
+        f'<p>Log In with <a href="/oauth2/{OAuth2SSOProvider.authentik.value}/authorize">Authentik</a> or <a'
     )
     if redirect_url is not None:
         title = "Login first"

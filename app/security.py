@@ -65,26 +65,36 @@ class Authentik(BaseOAuth2):
     # https://github.com/python-social-auth/social-core/blob/master/social_core/backends/github.py
 
     name = "authentik"
-    API_URL = settings.oauth_api_url
-    AUTHORIZATION_URL = settings.oauth_auth_url
-    ACCESS_TOKEN_URL = settings.oauth_access_token_url
+    AUTHORIZATION_URL = settings.OAUTH_AUTH_URL
+    ACCESS_TOKEN_URL = settings.OAUTH_TOKEN_URL
     ACCESS_TOKEN_METHOD = "POST"
     SCOPE_SEPARATOR = ","
     REDIRECT_STATE = False
-    STATE_PARAMETER = True
-    SEND_USER_AGENT = True
-    EXTRA_DATA = [("id", "id"), ("expires", "expires"), ("login", "login")]
+    #STATE_PARAMETER = True
+    #SEND_USER_AGENT = True
+    # EXTRA_DATA = [("id", "id"), ("expires", "expires"), ("login", "login")]
 
-    def api_url(self):
-        return self.API_URL
+    def authorization_url(self):
+        return self.AUTHORIZATION_URL
+
+    def get_user_details(self, response):
+        """Return user details from Github account"""
+        fullname, first_name, last_name = self.get_user_names(response.get("name"))
+        return {
+            "username": response.get("login"),
+            "email": response.get("email") or "",
+            "fullname": fullname,
+            "first_name": first_name,
+            "last_name": last_name,
+        }
 
 
 oauth2_clients = [
     OAuth2Client(
         backend=Authentik,
-        client_id=settings.oauth_client_id,
-        client_secret=settings.oauth_client_secret,
-        scope=["openid", "email"],
+        client_id=settings.OAUTH_CLIENT_ID,
+        client_secret=settings.OAUTH_CLIENT_SECRET,
+        scope=["user:email"],
         claims=Claims(identity=lambda user: f"{user.provider}:{user.sub}",),
     ),
 ]

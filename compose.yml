@@ -26,18 +26,13 @@ services:
       ALLOW_INSECURE_HTTP: 1
       OAUTHLIB_INSECURE_TRANSPORT: 1
       CHAT_MODELS: ${CHAT_MODELS}
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       USE_EMAILS_ALLOWLIST: 0
       COMP_PHASE: ${COMP_PHASE}
       LEADERBOARD_CACHE_EXPIRATION: 10
-      START_TIMESTAMP: ${START_TIMESTAMP}
     secrets:
       - secret_key
       - openai_api_key
       - together_api_key
-      - github_client_secret
-      - google_client_secret
       - mongodb_root_password
       - redis_password
 
@@ -112,7 +107,3 @@ secrets:
     file: .secrets/openai_api_key
   together_api_key:
     file: .secrets/together_api_key
-  github_client_secret:
-    file: .secrets/dev/github_client_secret
-  google_client_secret:
-    file: .secrets/dev/google_client_secret
