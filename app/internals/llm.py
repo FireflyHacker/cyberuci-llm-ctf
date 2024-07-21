@@ -22,13 +22,13 @@ ROLE_MAPPING = {
 #     return model.startswith("meta/")
 
 
-def is_llama3(model: str) -> bool:
-    return model.startswith("llama3/")
+def is_ollama(model: str) -> bool:
+    return model.startswith("ollama/")
 
 
 def get_model_provider(model: str) -> enums.APIProvider:
-    if is_llama3(model):
-        return enums.APIProvider.llama3
+    if is_ollama(model):
+        return enums.APIProvider.ollama
 
     raise ValueError(f"Invalid model: {model}")
 
@@ -41,12 +41,12 @@ def get_model_provider(model: str) -> enums.APIProvider:
 #     return f"{TOGETHER_PREFIX}/{model.split('/')[1]}"
 
 
-def parse_llama3_model(model: str) -> str:
+def parse_ollama_model(model: str) -> str:
     return model.split("/")[1]
 
 
 #MODEL_PARSERS = {enums.APIProvider.openai: parse_openai_model, enums.APIProvider.together: parse_together_model, enums.APIProvider.llama3: parse_llama3_model}
-MODEL_PARSERS = {enums.APIProvider.llama3: parse_llama3_model}
+MODEL_PARSERS = {enums.APIProvider.ollama: parse_ollama_model}
 
 
 def parse_model_to_litellm(model: str) -> str:
@@ -85,9 +85,8 @@ async def generate(llm_provider_api_key, messages, model):
 
 async def ollama_generate(api_base, messages, model):
     completion = await litellm.acompletion(
-        model=parse_model_to_litellm(model),
+        model="ollama/llama3",
         messages=messages,
-        max_tokens=settings.max_tokens,
         api_base=api_base,
         request_timeout=settings.llm_request_timeout,
     )
@@ -104,7 +103,7 @@ async def generate_chat(
 ) -> tuple[str, float]:
     system_prompt = build_system_prompt(system_prompt, secret_prompt, chat.secret.value, chat.defense.defense_prompt)
     messages = build_openai_conversation(system_prompt, chat.history)
-    return await generate(llm_provider_api_key, messages, chat.model.value)
+    return await ollama_generate(llm_provider_api_key, messages, chat.model.value)
 
 
 async def ollama_generate_chat(

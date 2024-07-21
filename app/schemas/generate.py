@@ -6,6 +6,7 @@ from app import enums
 class LLMProviderAPIKeys(BaseModel):
     openai: str | None = None
     together: str | None = None
+    ollama: str | None = None
 
     def get_for_provider(self, provider: enums.APIProvider) -> str | None:
         match provider:
@@ -13,6 +14,8 @@ class LLMProviderAPIKeys(BaseModel):
                 return self.openai
             case enums.APIProvider.together:
                 return self.together
+            case enums.APIProvider.ollama:
+                return self.ollama
         raise ValueError("Provider key match failed")
 
 

@@ -67,6 +67,7 @@ class Authentik(BaseOAuth2):
     name = "authentik"
     AUTHORIZATION_URL = settings.OAUTH_AUTH_URL
     ACCESS_TOKEN_URL = settings.OAUTH_TOKEN_URL
+    USER_INFO_URL = settings.OAUTH_USER_INFO
     ACCESS_TOKEN_METHOD = "POST"
     SCOPE_SEPARATOR = ","
     REDIRECT_STATE = False
@@ -77,16 +78,15 @@ class Authentik(BaseOAuth2):
     def authorization_url(self):
         return self.AUTHORIZATION_URL
 
-    def get_user_details(self, response):
-        """Return user details from Github account"""
-        fullname, first_name, last_name = self.get_user_names(response.get("name"))
-        return {
-            "username": response.get("login"),
-            "email": response.get("email") or "",
-            "fullname": fullname,
-            "first_name": first_name,
-            "last_name": last_name,
-        }
+    def user_data(self, access_token, *args, **kwargs):
+        """Loads user data from service. Implement in subclass"""
+        print("USER DATA REQUESTED")
+        return self.get_json(
+            self.USER_INFO_URL,
+            headers={
+                "Authorization": "Bearer %s" % access_token,
+            },
+        )
 
 
 oauth2_clients = [
@@ -94,7 +94,6 @@ oauth2_clients = [
         backend=Authentik,
         client_id=settings.OAUTH_CLIENT_ID,
         client_secret=settings.OAUTH_CLIENT_SECRET,
-        scope=["user:email"],
         claims=Claims(identity=lambda user: f"{user.provider}:{user.sub}",),
     ),
 ]

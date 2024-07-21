@@ -7,6 +7,7 @@ from starlette import status
 
 from app import crud, enums, models, schemas, security
 from app.api import deps
+from app.api.api_v1.endpoints.defense import update_defense
 from app.config import settings
 from app.crud.crud_secret import AllSecretsGuessedError
 from app.internals import llm, output_filter
@@ -365,6 +366,7 @@ async def generate_new_message(
     provider = llm.get_model_provider(chat.model.value)
     if data.api_keys is None or data.api_keys.get_for_provider(provider) is None:
         remaining_budget = await crud.team_budget.get_remaining_budget(user_id=current_user.id, provider=provider)
+        # TODO: fix budget to work for local models
         # TODO: maybe estimate the cost of the incoming message
         if remaining_budget <= 0.0:
             raise HTTPException(

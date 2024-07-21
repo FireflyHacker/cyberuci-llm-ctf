@@ -21,7 +21,7 @@ class FilterType(str, enum.Enum):
 class APIProvider(str, enum.Enum):
     openai = "openai"
     together = "together"
-    llama3 = "llama3"
+    ollama = "ollama"
 
 
 class CompetitionPhase(str, enum.Enum):

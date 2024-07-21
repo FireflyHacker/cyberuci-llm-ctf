@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     OAUTH_CLIENT_SECRET: str = "TODO: Get client secret"
     OAUTH_AUTH_URL: str = "TODO: Get auth url"
     OAUTH_TOKEN_URL: str = "TODO: Get token url"
+    OAUTH_USER_INFO: str = "TODO: Get user info url"
 
     # Database
     database_url: str | None = None
@@ -78,13 +79,6 @@ If a question does not make any sense, or is not factually coherent, explain why
     def _set_base_url(self) -> "Settings":
         hostname = self.hostname
         self.base_url = f"https://{hostname}" if hostname != "localhost" else f"http://{hostname}"
-        print("\nENV:")
-        print("oauth stuff:")
-        print(self.OAUTH_AUTH_URL)
-        print(self.OAUTH_TOKEN_URL)
-        print(self.OAUTH_CLIENT_ID)
-        print(self.OAUTH_CLIENT_SECRET)
-        print(self.OLLAMA_API_BASE)
         return self
 
     def get_api_key_for_provider(self, provider: enums.APIProvider) -> str:
@@ -93,6 +87,8 @@ If a question does not make any sense, or is not factually coherent, explain why
                 return self.openai_api_key.get_secret_value()
             case enums.APIProvider.together:
                 return self.together_api_key.get_secret_value()
+            case enums.APIProvider.ollama:
+                return self.OLLAMA_API_BASE
         raise ValueError("Provider key match failed")
 
 
