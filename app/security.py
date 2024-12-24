@@ -113,8 +113,8 @@ class UserNotOnAllowListError(AuthenticationError):
 async def on_auth_success(auth: Auth, user: OAuth2User):
     if not user.is_authenticated:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials via SSO")
-    if settings.use_emails_allowlist and user.email.lower() not in settings.allowed_emails:
-        raise UserNotOnAllowListError(user.email)
+    #if settings.use_emails_allowlist and user.email.lower() not in settings.allowed_emails:
+    #    raise UserNotOnAllowListError(user.email)
     existing_user_email = await crud.user.get_by_email(email=user.email)
     existing_user_openid_id = await crud.user.get_by_openid_id(openid_id=user.identity)
     if existing_user_email is not None:
