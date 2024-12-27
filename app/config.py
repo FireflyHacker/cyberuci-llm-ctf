@@ -73,6 +73,7 @@ If a question does not make any sense, or is not factually coherent, explain why
     leaderboard_cache_expiration: int = 60
     start_timestamp: int = 1707134399  # 4 Feb 2024, 23:59:59 Anywhere on Earth
     comp_phase: CompetitionPhase = CompetitionPhase.finished
+    comp_phase_all: bool = True # True = All comp phases work, False = Only specified phase will be allowed
     final_scores_path: Path = Path("/data") / "final_scores.json"
 
     @model_validator(mode="after")

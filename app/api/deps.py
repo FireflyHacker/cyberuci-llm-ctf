@@ -65,7 +65,7 @@ get_current_active_superuser_api_key = get_current_active_superuser_fn(get_curre
 def get_api_key_user_dependency_for_current_phase(*phases: enums.CompetitionPhase):
     """If the current phase does not equal the required phase, return the superuser dependency, else return the user
     dependency."""
-    if config.settings.comp_phase in phases:
+    if config.settings.comp_phase_all or config.settings.comp_phase in phases:
         return get_current_active_user_api_key
     return get_current_active_superuser_fn(
         get_current_user_api_key,
@@ -76,7 +76,7 @@ def get_api_key_user_dependency_for_current_phase(*phases: enums.CompetitionPhas
 def get_user_dependency_for_current_phase(*phases: enums.CompetitionPhase):
     """If the current phase does not equal the required phase, return the superuser dependency, else return the user
     dependency."""
-    if config.settings.comp_phase in phases:
+    if config.settings.comp_phase_all or config.settings.comp_phase in phases:
         return get_current_active_user
     return get_current_active_superuser_fn(
         get_current_user, f"This endpoint is not active for the current phase ('{config.settings.comp_phase.value}')."

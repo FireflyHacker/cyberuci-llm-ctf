@@ -71,9 +71,10 @@ class Authentik(BaseOAuth2):
     ACCESS_TOKEN_METHOD = "POST"
     SCOPE_SEPARATOR = ","
     REDIRECT_STATE = False
+    DEFAULT_SCOPE = ["openid", "email", "offline_access"]
     #STATE_PARAMETER = True
     #SEND_USER_AGENT = True
-    # EXTRA_DATA = [("id", "id"), ("expires", "expires"), ("login", "login")]
+    #EXTRA_DATA = [("id", "id"), ("expires", "expires"), ("login", "login")]
 
     def authorization_url(self):
         return self.AUTHORIZATION_URL
