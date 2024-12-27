@@ -22,6 +22,7 @@ frontend_router = APIRouter()
 NICE_PROVIDER_NAMES = {
     OAuth2SSOProvider.google: "Google",
     OAuth2SSOProvider.github: "GitHub",
+    OAuth2SSOProvider.authentik: "Authentik",
 }
 
 HEADER = """
@@ -32,21 +33,21 @@ HEADER = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/static/favicon-32x32.png">
     <link rel="stylesheet" href="https://unpkg.com/mvp.css">
-    <title>LLM CTF @ SaTML 2024 | {title}</title>
+    <title>Cyber@UCI LLM CTF | {title}</title>
 </head>
 <body>
 <header>
      <nav>
-          <h1>LLM CTF @ SaTML 2024</h1>
+          <h1>Cyber@UCI LLM CTF</h1>
           <ul>
               <li><a href="/">Home</a></li>
               <li><a href="/static/rules.pdf">Rules</a></li>
               <li><a href="/leaderboard/">Leaderboard</a></li>
-              <li><a href="/attack/">Interface</a></li>
+              <li><a href="/attack/">Attack</a></li>
+              <li><a href="/defense/">Defend</a></li>
               <li><a href="/docs">API Docs</a></li>
               <li><a href="/api-key">API Key</a></li>
-              <li><a target="_blank" href="https://github.com/ethz-spylab/satml-llms-ctf-issues">Issue tracker</a></li>
-              <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSc5lDXapW76S5yp3VylOpzsiOp8l2NgC-aHieYZiFXdLawvsw/viewform">Register Team</a></li>
+              <li><a target="_blank" href="https://github.com/FireflyHacker/cyberuci-llm-ctf/issues">Issue tracker</a></li>
               {% if not logged_in %}
                 <li><a href="/login">Login</a></li>
               {% else %}
@@ -180,8 +181,7 @@ def login(
         return make_page(title="Login", body=body, logged_in=request.user.is_authenticated)
 
     body = (
-        f'<p>Log In with <a href="/oauth2/{OAuth2SSOProvider.google.value}/authorize">Google</a> or <a'
-        f' href="/oauth2/{OAuth2SSOProvider.github.value}/authorize">GitHub</a>.</p>'
+        f'<p>Log In with <a href="/oauth2/{OAuth2SSOProvider.authentik.value}/authorize">Authentik</a>'
     )
     if redirect_url is not None:
         title = "Login first"

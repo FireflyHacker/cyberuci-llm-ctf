@@ -1,14 +1,16 @@
 import secrets
 import string
 
+import fastapi_oauth2.client
 from fastapi import HTTPException
 from fastapi_oauth2.claims import Claims
 from fastapi_oauth2.client import OAuth2Client
 from fastapi_oauth2.middleware import Auth
 from fastapi_oauth2.middleware import User as OAuth2User
 from passlib.context import CryptContext
-from social_core.backends.github import GithubOAuth2
-from social_core.backends.google import GoogleOAuth2
+# from social_core.backends.github import GithubOAuth2
+# from social_core.backends.google import GoogleOAuth2
+from social_core.backends.oauth import BaseOAuth2
 from starlette import status
 from starlette.authentication import AuthenticationError
 
@@ -31,28 +33,69 @@ def verify_api_key(plain_api_key, hashed_api_key):
     return pwd_context.verify(plain_api_key, hashed_api_key)
 
 
-class CustomGoogleOAuth2(GoogleOAuth2):
-    name = "google"
+# class CustomGoogleOAuth2(GoogleOAuth2):
+#     name = "google"
+
+
+# oauth2_clients = [
+#     OAuth2Client(
+#         backend=CustomGoogleOAuth2,
+#         client_id=settings.google_client_id,
+#         client_secret=settings.google_client_secret,
+#         scope=["openid", "email"],
+#         claims=Claims(
+#             identity=lambda user: f"{user.provider}:{user.sub}",
+#         ),
+#     ),
+#     OAuth2Client(
+#         backend=GithubOAuth2,
+#         client_id=settings.github_client_id,
+#         client_secret=settings.github_client_secret,
+#         scope=["user:email"],
+#         claims=Claims(
+#             identity=lambda user: f"{user.provider}:{user.id}",
+#         ),
+#     ),
+# ]
+
+
+class Authentik(BaseOAuth2):
+    """Authentik OAuth authentication backend"""
+    # https://github.com/python-social-auth/social-core/blob/master/social_core/backends/oauth.py
+    # https://github.com/python-social-auth/social-core/blob/master/social_core/backends/github.py
+
+    name = "authentik"
+    AUTHORIZATION_URL = settings.OAUTH_AUTH_URL
+    ACCESS_TOKEN_URL = settings.OAUTH_TOKEN_URL
+    USER_INFO_URL = settings.OAUTH_USER_INFO
+    ACCESS_TOKEN_METHOD = "POST"
+    SCOPE_SEPARATOR = ","
+    REDIRECT_STATE = False
+    DEFAULT_SCOPE = ["openid", "email", "offline_access"]
+    #STATE_PARAMETER = True
+    #SEND_USER_AGENT = True
+    #EXTRA_DATA = [("id", "id"), ("expires", "expires"), ("login", "login")]
+
+    def authorization_url(self):
+        return self.AUTHORIZATION_URL
+
+    def user_data(self, access_token, *args, **kwargs):
+        """Loads user data from service. Implement in subclass"""
+        print("USER DATA REQUESTED")
+        return self.get_json(
+            self.USER_INFO_URL,
+            headers={
+                "Authorization": "Bearer %s" % access_token,
+            },
+        )
 
 
 oauth2_clients = [
     OAuth2Client(
-        backend=CustomGoogleOAuth2,
-        client_id=settings.google_client_id,
-        client_secret=settings.google_client_secret,
-        scope=["openid", "email"],
-        claims=Claims(
-            identity=lambda user: f"{user.provider}:{user.sub}",
-        ),
-    ),
-    OAuth2Client(
-        backend=GithubOAuth2,
-        client_id=settings.github_client_id,
-        client_secret=settings.github_client_secret,
-        scope=["user:email"],
-        claims=Claims(
-            identity=lambda user: f"{user.provider}:{user.id}",
-        ),
+        backend=Authentik,
+        client_id=settings.OAUTH_CLIENT_ID,
+        client_secret=settings.OAUTH_CLIENT_SECRET,
+        claims=Claims(identity=lambda user: f"{user.provider}:{user.sub}",),
     ),
 ]
 
@@ -71,8 +114,8 @@ class UserNotOnAllowListError(AuthenticationError):
 async def on_auth_success(auth: Auth, user: OAuth2User):
     if not user.is_authenticated:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials via SSO")
-    if settings.use_emails_allowlist and user.email.lower() not in settings.allowed_emails:
-        raise UserNotOnAllowListError(user.email)
+    #if settings.use_emails_allowlist and user.email.lower() not in settings.allowed_emails:
+    #    raise UserNotOnAllowListError(user.email)
     existing_user_email = await crud.user.get_by_email(email=user.email)
     existing_user_openid_id = await crud.user.get_by_openid_id(openid_id=user.identity)
     if existing_user_email is not None:

@@ -4,6 +4,7 @@ import enum
 class OAuth2SSOProvider(str, enum.Enum):
     google = "google"
     github = "github"
+    authentik = "authentik"
 
 
 class ChatRole(str, enum.Enum):
@@ -20,6 +21,7 @@ class FilterType(str, enum.Enum):
 class APIProvider(str, enum.Enum):
     openai = "openai"
     together = "together"
+    ollama = "ollama"
 
 
 class CompetitionPhase(str, enum.Enum):

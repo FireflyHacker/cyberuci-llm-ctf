@@ -82,7 +82,7 @@ CACHED_SCORES_KEY = "scores"
 async def get_scores(
     redis_client: Annotated[redis.Redis, Depends(deps.get_redis_client)], response: Response
 ) -> list[schemas.SubmissionScore]:
-    if settings.comp_phase is enums.CompetitionPhase.defense:
+    if not settings.comp_phase_all and settings.comp_phase is enums.CompetitionPhase.defense:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Scores are not available during defense phase."
         )
